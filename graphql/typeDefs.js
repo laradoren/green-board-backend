@@ -20,10 +20,16 @@ export const typeDefs = `#graphql
         code: String!
         students: [Student!]!
     }
+
+    type AuthData {
+        user: User!
+        token: String!
+    }
+
     input UserInput {
         fullname: String!
         email: String!
-        password: String!
+        password: String
         role: String!
     }
 
@@ -36,16 +42,26 @@ export const typeDefs = `#graphql
         code: String!
         students: [StudentInput!]!
     }
+
+    input AddStudentInput {
+        studentId: ID!
+        group: String!
+    }
+
     type Query {
         getUsers: [User!]!
-        allTeacher: [Teacher!]!
+        allTeachers: [Teacher!]!
         allStudents: [Student!]!
         allGroups: [Group!]!
+        login(email: String!, password: String!): AuthData
+        findUser(email: String!): User
     }
 
     type Mutation {
         createUser(newUser: UserInput): User
         createGroup(newGroup: GroupInput): Group
+        addStudent(info: AddStudentInput): Student
+        register(email: String!, password:String!, confirmedPassword: String! ): AuthData
     }
 
 `

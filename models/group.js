@@ -7,7 +7,7 @@ const groupSchema = new Schema({
         type: String,
         required: true
     },
-    users: [
+    students: [
         {
             type: Schema.Types.ObjectId,
             ref: "Student"

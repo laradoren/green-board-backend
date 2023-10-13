@@ -1,0 +1,106 @@
+import User from "../../models/user.js";
+import jwt from "jsonwebtoken";
+import {GraphQLError} from "graphql";
+import bcrypt from "bcryptjs";
+
+export const findUserByEmail = async (email) => await User.findOne({email: email});
+export const login = async (_, args) => {
+    let {email, password} = args;
+    let errors = {};
+
+    try {
+        const user = await findUserByEmail(email);
+
+        if(!user) {
+            errors.message = "User does not found";
+            errors.code = "USER_DONT_FOUND";
+            throw errors;
+        }
+
+         const correctPassword = await bcrypt.compare(password, user.password);
+
+        if(!correctPassword) {
+            errors.message = "Can`t authenticate with this data";
+            errors.code = "CANT_AUTHENTICATE";
+            throw errors;
+        }
+
+        const token = jwt.sign(
+            {userId: user.id, role: user.role, email: user.email},
+            'privatekey',
+            {expiresIn: "2h"}
+        );
+
+        return {
+            user, token: token
+        }
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: error.code
+            }
+        });
+    }
+};
+
+export const findUser = async (_, args) => {
+    const {email} = args;
+    let errors = {};
+    try {
+        const user = await findUserByEmail(email);
+        if(!user) {
+            errors.message = "User does not found";
+            errors.code = "USER_DONT_FOUND";
+            throw errors;
+        }
+
+        return user;
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: error.code
+            }
+        });
+    }
+}
+
+export const register = async (_, args) => {
+    let {email, password} = args;
+    let errors = {};
+    try {
+        const user = await findUserByEmail(email);
+        if(!user) {
+            errors.message = "User does not found";
+            errors.code = "USER_DONT_FOUND";
+            throw errors;
+        }
+
+        password = await bcrypt.hash(password, 6);
+
+        const data = await User.findOneAndUpdate(
+            {email: email},
+            {password: password},
+            {new: true}
+        );
+
+        const token = jwt.sign(
+            {userId: data.id, role: data.role, email: data.email},
+            'privatekey',
+            {expiresIn: "2h"}
+        );
+
+        return {
+            user: data, token: token
+        }
+
+    } catch (error) {
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: error.code
+            }
+        });
+    }
+}
+
+export const logout = async (_, args) => {
+}
