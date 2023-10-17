@@ -1,11 +1,17 @@
 import User from "../../models/user.js";
 import Student from "../../models/student.js";
-import Teacher from "../../models/teacher.js";
 import Group from "../../models/group.js";
-import {login, register} from "./auth.js";
-import {createUser} from "./admin.js";
+import {findUser, login, register} from "./auth.js";
+import {
+    createGroup,
+    createTeachersList,
+    createUser, deleteStudentsList,
+    deleteTeachersList, getAllStudents,
+    getAllTeachers, updateStudent,
+    updateTeacher
+} from "./admin.js";
 
-const findUser = async userId => {
+export const findUserById = async userId => {
     try {
         const user = await User.findById(userId);
         if(!user) {
@@ -39,48 +45,18 @@ const addStudent = async data => {
 }
 export const resolvers = {
     Query: {
-        getUsers: () => {
-            return User.find().then(users => {
-                return users.map(user => {
-                    return {...user._doc}
-                })
-            }).catch(error => {
-                console.log(error);
-                throw error;
-            });
-        },
-        allTeachers: async () => {
-            try {
-                const teachers = await Teacher.find();
-                return teachers.map(async teacher => {
-                    const user = await findUser(teacher.user);
-                    return {
-                        ...teacher._doc,
-                        _id: teacher._id,
-                        user: user
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                throw error;
-            }
-        },
-        allStudents: async () => {
-            try {
-                const students = await Student.find();
-                return students.map(async student => {
-                    const user = await findUser(student.user);
-                    return {
-                        ...student._doc,
-                        _id: student._id,
-                        user: user
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                throw error;
-            }
-        },
+        // getUsers: () => {
+        //     return User.find().then(users => {
+        //         return users.map(user => {
+        //             return {...user._doc}
+        //         })
+        //     }).catch(error => {
+        //         console.log(error);
+        //         throw error;
+        //     });
+        // },
+        allTeachers: getAllTeachers,
+        allStudents: getAllStudents,
         allGroups: async () => {
             try {
                 const groups = await Group.find();
@@ -102,47 +78,30 @@ export const resolvers = {
 
     Mutation: {
         createUser: createUser,
-        createGroup: async (_, args) => {
-            //Add crypt password
-            const group = await Group.findOne({code: args.newGroup.code})
-            if(group) {
-                throw new Error('Group already exist');
-            }
-
-            const newUsers = args.newGroup.students.map(student => ({...student, role: "student"}));
-
-            const users = await User.insertMany(newUsers);
-
-            const students = users.map(user => ({user: user._id, group: args.newGroup.code}));
-
-            const newStudents = await Student.insertMany(students);
-
-            const newGroup = new Group({
-                code: args.newGroup.code,
-                students: newStudents
-            });
-
-            const result = await newGroup.save();
-            return {...result._doc}
-        },
-        addStudent: async (_, args) => {
-            const student = await Student.findById(args.info.studentId)
-            if(!student) {
-                throw new Error('Student does not exist');
-            }
-            let result = await Student.updateOne({
-                _id: args.info.studentId
-            }, {
-                $set: {
-                    group: args.info.group
-                }
-            });
-
-            console.log(result);
-            return {
-
-            }
-        },
+        createGroup: createGroup,
+        // addStudent: async (_, args) => {
+        //     const student = await Student.findById(args.info.studentId)
+        //     if(!student) {
+        //         throw new Error('Student does not exist');
+        //     }
+        //     let result = await Student.updateOne({
+        //         _id: args.info.studentId
+        //     }, {
+        //         $set: {
+        //             group: args.info.group
+        //         }
+        //     });
+        //
+        //     console.log(result);
+        //     return {
+        //
+        //     }
+        // },
         register: register,
+        createTeachersList: createTeachersList,
+        deleteTeachersList: deleteTeachersList,
+        deleteStudentsList: deleteStudentsList,
+        updateTeacher: updateTeacher,
+        updateStudent: updateStudent,
     },
 }

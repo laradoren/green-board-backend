@@ -28,7 +28,7 @@ export const login = async (_, args) => {
         const token = jwt.sign(
             {userId: user.id, role: user.role, email: user.email},
             'privatekey',
-            {expiresIn: "2h"}
+            {expiresIn: "24h"}
         );
 
         return {
@@ -75,6 +75,12 @@ export const register = async (_, args) => {
             throw errors;
         }
 
+        if(user.password) {
+            errors.message = "User already active";
+            errors.code = "USER_IS_ACTIVE";
+            throw errors;
+        }
+
         password = await bcrypt.hash(password, 6);
 
         const data = await User.findOneAndUpdate(
@@ -86,7 +92,7 @@ export const register = async (_, args) => {
         const token = jwt.sign(
             {userId: data.id, role: data.role, email: data.email},
             'privatekey',
-            {expiresIn: "2h"}
+            {expiresIn: "24h"}
         );
 
         return {
