@@ -1,6 +1,5 @@
 import User from "../../models/user.js";
 import Student from "../../models/student.js";
-import Group from "../../models/group.js";
 import {findUser, login, register} from "./auth.js";
 import {
     createGroup,
@@ -10,6 +9,14 @@ import {
     getAllTeachers, updateStudent,
     updateTeacher
 } from "./admin.js";
+import {
+    allGroups,
+    createSubject,
+    createTask,
+    deleteTask,
+    getTeacherSubjects,
+    updateTask
+} from "./teacher.js";
 
 export const findUserById = async userId => {
     try {
@@ -57,23 +64,10 @@ export const resolvers = {
         // },
         allTeachers: getAllTeachers,
         allStudents: getAllStudents,
-        allGroups: async () => {
-            try {
-                const groups = await Group.find();
-                return groups.map(async group => {
-                    const students = await User.find({group: group.code});
-                    return {
-                        ...group._doc,
-                        students
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-                throw error;
-            }
-        },
+        allGroups: allGroups,
         login: login,
         findUser: findUser,
+        getTeacherSubjects: getTeacherSubjects,
     },
 
     Mutation: {
@@ -103,5 +97,9 @@ export const resolvers = {
         deleteStudentsList: deleteStudentsList,
         updateTeacher: updateTeacher,
         updateStudent: updateStudent,
+        createSubject: createSubject,
+        createTask: createTask,
+        deleteTask: deleteTask,
+        updateTask: updateTask,
     },
 }

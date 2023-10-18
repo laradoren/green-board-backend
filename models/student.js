@@ -7,10 +7,7 @@ const studentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Student"
     },
-    group: String,
-    subjects: [
-
-    ]
+    group: String
 });
 
 export default mongoose.model('Student', studentSchema);

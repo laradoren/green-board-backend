@@ -2,23 +2,23 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const groupSchema = new Schema({
-    code: {
+const subjectSchema = new Schema({
+    title: {
         type: String,
         required: true
     },
-    students: [
+    groups: [
         {
             type: Schema.Types.ObjectId,
-            ref: "Student"
+            ref: "Group"
         }
     ],
-    subjects: [
+    tasks: [
         {
             type: Schema.Types.ObjectId,
-            ref: "Subject"
+            ref: "Task"
         }
     ]
 });
 
-export default mongoose.model('Group', groupSchema);
+export default mongoose.model('Subject', subjectSchema);

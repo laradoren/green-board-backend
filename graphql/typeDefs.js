@@ -32,14 +32,20 @@ export const typeDefs = `#graphql
 
     type Subject {
         _id: ID!
-        name: String!
+        title: String!
         groups: [Group!]!
     }
 
+    type TeacherSubject {
+        _id: ID!
+        title: String!
+        tasks: [Task!]
+    }
+
     type Task {
+        _id: ID!
         name: String!
         description: String!
-        file: String!
         hometasks: [ID!]
     }
 
@@ -70,10 +76,16 @@ export const typeDefs = `#graphql
         email: String!
     }
 
+    input SubjectInput {
+        email: String!
+        title: String!
+        groups: [ID!]!
+    }
+
     input TaskInput {
         name: String!
         description: String!
-        file: String!
+        subject: ID!
     }
 
     type Query {
@@ -83,7 +95,7 @@ export const typeDefs = `#graphql
         allGroups: [Group!]!
         login(email: String!, password: String!): AuthData
         findUser(email: String!): User
-        getSubjects(id: ID!): [Subject!]!
+        getTeacherSubjects(email: String!): [TeacherSubject!]!
     }
 
     type Mutation {
@@ -96,9 +108,9 @@ export const typeDefs = `#graphql
         deleteStudentsList(list: [ID!]): [Student!]
         updateTeacher(id: ID!, fullname: String!, email: String!): Teacher!
         updateStudent(id: ID!, fullname: String!, email: String!): Student!
-        createSubject(id: ID!, groups: [ID!]!): Subject!
-        createTask(newTask: TaskInput!): Task!
-        deleteTask(id: TaskInput!): Task!
+        createSubject(newSubject: SubjectInput): TeacherSubject!
+        createTask(newTask: TaskInput!): TeacherSubject!
+        deleteTask(id: ID!): TeacherSubject!
         updateTask(task: TaskInput!): Task!
     }
 `
