@@ -14,7 +14,7 @@ export const login = async (_, args) => {
         const user = await findUserByEmail(email);
 
         if(!user) {
-            errors.message = "User does not found";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_DONT_FOUND";
             throw errors;
         }
@@ -22,7 +22,7 @@ export const login = async (_, args) => {
          const correctPassword = await bcrypt.compare(password, user.password);
 
         if(!correctPassword) {
-            errors.message = "Can`t authenticate with this data";
+            errors.message = "Неможливо виконати в[ід з цими даними";
             errors.code = "CANT_AUTHENTICATE";
             throw errors;
         }
@@ -65,7 +65,7 @@ export const findUser = async (_, args) => {
     try {
         const user = await findUserByEmail(email);
         if(!user) {
-            errors.message = "User does not found";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_DONT_FOUND";
             throw errors;
         }
@@ -86,13 +86,13 @@ export const register = async (_, args) => {
     try {
         const user = await findUserByEmail(email);
         if(!user) {
-            errors.message = "User does not found";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_DONT_FOUND";
             throw errors;
         }
 
         if(user.password) {
-            errors.message = "User already active";
+            errors.message = "Користувач вже зареєтрований";
             errors.code = "USER_IS_ACTIVE";
             throw errors;
         }

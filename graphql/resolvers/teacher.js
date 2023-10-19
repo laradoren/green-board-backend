@@ -14,7 +14,13 @@ export const allGroups = async () => {
         return groups.map(async group => {
             return {
                 _id: group._id,
-                code: group.code
+                code: group.code,
+                students: group.students.map(async (student) => {
+                    let s = await Student.findById(student);
+                    return {
+                        _id: s._id
+                    }
+                })
             }
         });
     } catch (error) {
@@ -42,6 +48,7 @@ export const getTeacherSubjects = async (_, args, ctx) => {
             return {
                 _id: subject._id,
                 title: subject.title,
+                groups: subject.groups,
                 tasks: subject.tasks.map(async task => {
                     const t = await Task.findById(task);
                     return {
@@ -112,7 +119,7 @@ export const createSubject = async (_, args, ctx) => {
         return {
             _id: resultedSubject.id,
             title: resultedSubject.title,
-            tasks: resultedSubject.tasks
+            tasks: resultedSubject.tasks._id
         }
     } catch (error) {
         console.log(error);

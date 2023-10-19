@@ -18,7 +18,7 @@ export const createUser = async (_, args, ctx) => {
         }
         const user = await findUserByEmail(email);
         if(user) {
-            errors.message = "User already exist";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_ALREADY_EXIST";
             throw errors;
         }
@@ -80,7 +80,7 @@ export const createTeachersList = async (_, args, ctx) => {
             let {email, fullname} = item;
             const user = await findUserByEmail(email);
             if(user) {
-                errors.message = "User already exist";
+                errors.message = "Не знайдено Користувача";
                 errors.code = "USER_ALREADY_EXIST";
                 throw errors;
             }
@@ -143,14 +143,14 @@ export const deleteTeachersList = async (_, args, ctx) => {
         return list.map((async (id) => {
             const teacher = await Teacher.findById(id);
             if (!teacher) {
-                errors.message = "User does not found";
+                errors.message = "Не знайдено Вчителя";
                 errors.code = "USER_DONT_FOUND";
                 throw errors;
             }
 
             const user = await findUserById(teacher.user);
             if (!user) {
-                errors.message = "User does not found";
+                errors.message = "Не знайдено Користувача";
                 errors.code = "USER_DONT_FOUND";
                 throw errors;
             }
@@ -190,14 +190,14 @@ export const updateTeacher = async (_, args, ctx) => {
         }
         const teacher = await Teacher.findById(id);
         if(!teacher) {
-            errors.message = "User does not found";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_DONT_FOUND";
             throw errors;
         }
 
         const user = await findUserById(teacher.user);
         if(!user) {
-            errors.message = "User does not found";
+            errors.message = "Не знайдено Користувача";
             errors.code = "USER_DONT_FOUND";
             throw errors;
         }
@@ -358,7 +358,7 @@ export const createGroup = async (_, args, ctx) => {
         }
         const group = await Group.findOne({code: code})
         if(group) {
-            errors.message = "Group already exist";
+            errors.message = "Група вже існує";
             errors.code = "GROUP_ALREADY_EXIST";
             throw errors;
         }

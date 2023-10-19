@@ -42,6 +42,7 @@ export const typeDefs = `#graphql
     type TeacherSubject {
         _id: ID!
         title: String!
+        groups: [ID!]
         tasks: [Task!]
     }
 
