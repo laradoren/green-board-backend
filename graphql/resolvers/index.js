@@ -17,6 +17,7 @@ import {
     getTeacherSubjects,
     updateTask
 } from "./teacher.js";
+import {createHomeTask, getStudentsSubjects} from "./student.js";
 
 export const findUserById = async userId => {
     try {
@@ -68,6 +69,7 @@ export const resolvers = {
         login: login,
         findUser: findUser,
         getTeacherSubjects: getTeacherSubjects,
+        getStudentSubjects: getStudentsSubjects,
     },
 
     Mutation: {
@@ -101,5 +103,6 @@ export const resolvers = {
         createTask: createTask,
         deleteTask: deleteTask,
         updateTask: updateTask,
+        createHometask: createHomeTask
     },
 }

@@ -2,6 +2,8 @@ import User from "../../models/user.js";
 import jwt from "jsonwebtoken";
 import {GraphQLError} from "graphql";
 import bcrypt from "bcryptjs";
+import Student from "../../models/student.js";
+import Teacher from "../../models/teacher.js";
 
 export const findUserByEmail = async (email) => await User.findOne({email: email});
 export const login = async (_, args) => {
@@ -26,10 +28,24 @@ export const login = async (_, args) => {
         }
 
         const token = jwt.sign(
-            {userId: user.id, role: user.role, email: user.email},
+            {userId: user._id, role: user.role, email: user.email},
             'privatekey',
             {expiresIn: "24h"}
         );
+
+        if(user.role === "student") {
+            let student = await Student.findOne({user: user._id});
+            return {
+                user, token: token, group: student.group, student: student._id
+            }
+        }
+
+        if(user.role === "teacher") {
+            let teacher = await Teacher.findOne({user: user._id});
+            return {
+                user, token: token, teacher: teacher._id
+            }
+        }
 
         return {
             user, token: token
@@ -94,6 +110,20 @@ export const register = async (_, args) => {
             'privatekey',
             {expiresIn: "24h"}
         );
+
+        if(user.role === "student") {
+            let student = await Student.findOne({user: user._id});
+            return {
+                user, token: token, group: student.group, student: student._id
+            }
+        }
+
+        if(user.role === "teacher") {
+            let teacher = await Teacher.findOne({user: user._id});
+            return {
+                user, token: token, teacher: teacher._id
+            }
+        }
 
         return {
             user: data, token: token

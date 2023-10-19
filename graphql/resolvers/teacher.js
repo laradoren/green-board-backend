@@ -4,6 +4,7 @@ import Teacher from "../../models/teacher.js";
 import Subject from "../../models/subject.js";
 import Task from "../../models/task.js";
 import {GraphQLError} from "graphql/index.js";
+import Hometask from "../../models/hometask.js";
 
 export const allGroups = async () => {
     try {
@@ -24,7 +25,7 @@ export const allGroups = async () => {
     }
 }
 export const getTeacherSubjects = async (_, args, ctx) => {
-    let {email} = args;
+    let {id} = args;
     let errors = {};
     try {
         if(!ctx.isAuth || ctx.role !== "teacher") {
@@ -32,13 +33,8 @@ export const getTeacherSubjects = async (_, args, ctx) => {
             errors.code = "NOT_AUTHORIZED";
             throw errors;
         }
-        const user = await User.findOne({email: email});
-        if(!user) {
-            errors.message = "Not found";
-            errors.code = "NOT_AUTHORIZED";
-            throw errors;
-        }
-        const teacher = await Teacher.findOne({user: user._id});
+
+        const teacher = await Teacher.findById(id);
         return teacher.subjects.map(async s => {
             const subject = await Subject.findById(s);
             return {
@@ -49,7 +45,15 @@ export const getTeacherSubjects = async (_, args, ctx) => {
                     return {
                         _id: t._id,
                         name: t.name,
-                        description: t.description
+                        description: t.description,
+                        hometasks: t.hometasks.map(async(h) => {
+                            const hometask = await Hometask.findOne({_id: h});
+                            return {
+                                _id: hometask._id,
+                                text: hometask.text,
+                                status: hometask.status
+                            }
+                        })
                     }
                 })
             }
@@ -64,7 +68,7 @@ export const getTeacherSubjects = async (_, args, ctx) => {
     }
 }
 export const createSubject = async (_, args, ctx) => {
-    let {email, title, groups} = args.newSubject;
+    let {teacher, title, groups} = args.newSubject;
     let errors = {};
     try {
         if(!ctx.isAuth || ctx.role !== "teacher") {
@@ -88,21 +92,14 @@ export const createSubject = async (_, args, ctx) => {
 
         const resultedSubject = await newSubject.save();
 
-        const user = await User.findOne({email: email});
-        if(!user) {
-            errors.message = "Not found";
-            errors.code = "NOT_AUTHORIZED";
-            throw errors;
-        }
-
-        await Teacher.updateOne(
-            { user: user._id },
+        await Teacher.findOneAndUpdate(
+            { _id: teacher },
             { $push: { subjects: resultedSubject._id } }
         );
 
-        groups.map((group) => {
-            return Group.updateOne({code: group},
-                {$push: {subjects: resultedSubject._id}});
+        groups.map(async (group) => {
+            await Group.findOneAndUpdate({_id: group},
+                {$push: {subjects: resultedSubject._id}}, {new: true});
         });
 
         return {
@@ -137,7 +134,7 @@ export const createTask = async (_, args, ctx) => {
             throw errors;
         }
 
-        const newTask = new Task({name, description, subject});
+        const newTask = new Task({name, description, subject, hometasks: []});
         const task = await newTask.save();
 
         let updatedSubject = await Subject.findOneAndUpdate(
@@ -151,7 +148,7 @@ export const createTask = async (_, args, ctx) => {
             return {
                 _id: t._id,
                 name: t.name,
-                description: t.description
+                description: t.description,
             }
         });
 
@@ -163,7 +160,15 @@ export const createTask = async (_, args, ctx) => {
                 return {
                     _id: t._id,
                     name: t.name,
-                    description: t.description
+                    description: t.description,
+                    hometasks: t.hometasks.map(async(h) => {
+                        const hometask = await Hometask.findOne({_id: h});
+                        return {
+                            _id: hometask._id,
+                            text: hometask.text,
+                            status: hometask.status
+                        }
+                    })
                 }
             })
         }
@@ -210,7 +215,16 @@ export const deleteTask = async (_, args, ctx) => {
                 return {
                     _id: t._id,
                     name: t.name,
-                    description: t.description
+                    description: t.description,
+                    hometasks: t.hometasks.map(async(h) => {
+                        console.log("here");
+                        const hometask = await Hometask.findOne({_id: h});
+                        return {
+                            _id: hometask._id,
+                            text: hometask.text,
+                            status: hometask.status
+                        }
+                    })
                 }
             })
         }
@@ -235,7 +249,7 @@ export const updateTask = async () => {
             }
         });
     } catch (error) {
-        //console.log(error);
+        console.log(error);
         throw error;
     }
 }

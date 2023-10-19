@@ -16,6 +16,13 @@ const taskSchema = new Schema({
         ref: "Subject",
         required: true
     },
+    hometasks: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Hometask",
+            required: true
+        }
+    ]
 });
 
 export default mongoose.model('Task', taskSchema);

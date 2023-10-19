@@ -28,6 +28,9 @@ export const typeDefs = `#graphql
     type AuthData {
         user: User!
         token: String!
+        group: String
+        teacher: ID
+        student: ID
     }
 
     type Subject {
@@ -42,11 +45,25 @@ export const typeDefs = `#graphql
         tasks: [Task!]
     }
 
+    type StudentSubject {
+        _id: ID!
+        title: String!
+        tasks: [Task!]
+    }
+
     type Task {
         _id: ID!
         name: String!
         description: String!
-        hometasks: [ID!]
+        hometasks: [HomeTask!]!
+    }
+
+    type HomeTask {
+        _id: ID!
+        text: String!
+        status: String!
+        task: ID!
+        student: Student!
     }
 
     input UserInput {
@@ -77,7 +94,7 @@ export const typeDefs = `#graphql
     }
 
     input SubjectInput {
-        email: String!
+        teacher: String!
         title: String!
         groups: [ID!]!
     }
@@ -88,6 +105,13 @@ export const typeDefs = `#graphql
         subject: ID!
     }
 
+    input HometaskInput {
+        text: String!
+        status: String!
+        student: ID!
+        task: ID!
+    }
+
     type Query {
         getUsers: [User!]!
         allTeachers: [Teacher!]!
@@ -95,7 +119,8 @@ export const typeDefs = `#graphql
         allGroups: [Group!]!
         login(email: String!, password: String!): AuthData
         findUser(email: String!): User
-        getTeacherSubjects(email: String!): [TeacherSubject!]!
+        getTeacherSubjects(id: ID!): [TeacherSubject!]!
+        getStudentSubjects(group: String!, id: ID!): [StudentSubject!]!
     }
 
     type Mutation {
@@ -112,5 +137,7 @@ export const typeDefs = `#graphql
         createTask(newTask: TaskInput!): TeacherSubject!
         deleteTask(id: ID!): TeacherSubject!
         updateTask(task: TaskInput!): Task!
+        createHometask(hometask: HometaskInput!): StudentSubject!
+        updateHometask(id: ID, status: String!, text: String!): StudentSubject! 
     }
 `
