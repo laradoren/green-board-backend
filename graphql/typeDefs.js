@@ -138,6 +138,6 @@ export const typeDefs = `#graphql
         deleteTask(id: ID!): TeacherSubject!
         updateTask(task: TaskInput!): Task!
         createHometask(hometask: HometaskInput!): StudentSubject!
-        updateHometask(id: ID, status: String!, text: String!): StudentSubject! 
+        updateHometask(id: ID!, status: String!): HomeTask! 
     }
 `

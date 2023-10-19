@@ -5,6 +5,8 @@ import Subject from "../../models/subject.js";
 import Task from "../../models/task.js";
 import {GraphQLError} from "graphql/index.js";
 import Hometask from "../../models/hometask.js";
+import hometask from "../../models/hometask.js";
+import Student from "../../models/student.js";
 
 export const allGroups = async () => {
     try {
@@ -48,10 +50,15 @@ export const getTeacherSubjects = async (_, args, ctx) => {
                         description: t.description,
                         hometasks: t.hometasks.map(async(h) => {
                             const hometask = await Hometask.findOne({_id: h});
+                            const student = await Student.findById(hometask.student);
+                            const user = await User.findById(student.user);
                             return {
                                 _id: hometask._id,
                                 text: hometask.text,
-                                status: hometask.status
+                                status: hometask.status,
+                                student: {
+                                    user: user
+                                }
                             }
                         })
                     }
@@ -163,10 +170,15 @@ export const createTask = async (_, args, ctx) => {
                     description: t.description,
                     hometasks: t.hometasks.map(async(h) => {
                         const hometask = await Hometask.findOne({_id: h});
+                        const student = await Student.findById(hometask.student);
+                        const user = await User.findById(student.user);
                         return {
                             _id: hometask._id,
                             text: hometask.text,
-                            status: hometask.status
+                            status: hometask.status,
+                            student: {
+                                user: user
+                            }
                         }
                     })
                 }
@@ -205,6 +217,10 @@ export const deleteTask = async (_, args, ctx) => {
             {new: true}
         );
 
+        task.hometasks.map(async(h) => {
+           await Hometask.findByIdAndDelete(h);
+        });
+
         await Task.findByIdAndDelete(id);
 
         return {
@@ -217,12 +233,16 @@ export const deleteTask = async (_, args, ctx) => {
                     name: t.name,
                     description: t.description,
                     hometasks: t.hometasks.map(async(h) => {
-                        console.log("here");
                         const hometask = await Hometask.findOne({_id: h});
+                        const student = await Student.findById(hometask.student);
+                        const user = await User.findById(student.user);
                         return {
                             _id: hometask._id,
                             text: hometask.text,
-                            status: hometask.status
+                            status: hometask.status,
+                            student: {
+                                user: user
+                            }
                         }
                     })
                 }
@@ -251,6 +271,34 @@ export const updateTask = async () => {
     } catch (error) {
         console.log(error);
         throw error;
+    }
+}
+
+export const updateHomeTask = async (_, args, ctx) => {
+    let {id, status} = args;
+    let errors = {};
+    try {
+        if(!ctx.isAuth || ctx.role !== "teacher") {
+            errors.message = "Not Authorized for this action";
+            errors.code = "NOT_AUTHORIZED";
+            throw errors;
+        }
+
+        let hometask = await Hometask.findOneAndUpdate({_id: id}, {status}, {new: true});
+        return {
+            _id: hometask._id,
+            text: hometask.text,
+            status: hometask.status,
+            task: hometask.task,
+            student: hometask.student,
+        }
+    } catch (error) {
+        console.log(error);
+        throw new GraphQLError(error.message, {
+            extensions: {
+                code: error.code
+            }
+        });
     }
 }
 

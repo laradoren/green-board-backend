@@ -14,7 +14,7 @@ import {
     createSubject,
     createTask,
     deleteTask,
-    getTeacherSubjects,
+    getTeacherSubjects, updateHomeTask,
     updateTask
 } from "./teacher.js";
 import {createHomeTask, getStudentsSubjects} from "./student.js";
@@ -103,6 +103,7 @@ export const resolvers = {
         createTask: createTask,
         deleteTask: deleteTask,
         updateTask: updateTask,
-        createHometask: createHomeTask
+        createHometask: createHomeTask,
+        updateHometask: updateHomeTask
     },
 }
